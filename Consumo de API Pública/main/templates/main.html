@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta Processos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .processo-card {
+            border-left: 4px solid #22344A;
+        }
+
+        .search-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .valor-processo {
+            font-weight: bold;
+            color: #22344A;
+        }
+
+        .loading-spinner {
+            display: none;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #22344A;
+            box-shadow: 0 0 0 0.25rem rgba(34, 52, 74, 0.25);
+        }
+
+        .bg-primary,
+        .btn-primary {
+            background-color: #22344A !important;
+            border-color: #22344A !important;
+        }
+
+        .btn-primary:hover {
+            background-color: #1a2a3a !important;
+            border-color: #1a2a3a !important;
+        }
+
+        .text-primary {
+            color: #22344A !important;
+        }
+
+        .btn-consultar,
+        .btn-navbar {
+            background-color: #e1a638 !important;
+            border-color: #e1a638 !important;
+        }
+
+        .btn-consultar:hover,
+        .btn-navbar:hover {
+            background-color: #c78a2d !important;
+            border-color: #c78a2d !important;
+        }
+
+        #resultados .text-muted {
+            color: #6c757d !important;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas fa-balance-scale me-2" aria-hidden="true"></i>Consulta Processos</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-home me-1"
+                                aria-hidden="true"></i> Início</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-question-circle me-1"
+                                aria-hidden="true"></i> Ajuda</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row mb-4">
+            <div class="col-md-10 mx-auto">
+                <div class="search-box">
+                    <h2 class="h4 mb-4 text-center"><i class="fas fa-search me-2" aria-hidden="true"></i>Consulta de Processos</h2>
+                    <form id="consultaForm">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="municipio" class="form-label">Município</label>
+                                <select class="form-select" id="municipio" aria-label="Selecione o município">
+                                    <option value="">Selecione...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="unidade" class="form-label">Unidade</label>
+                                <select class="form-select" id="unidade" aria-label="Selecione a unidade" disabled>
+                                    <option value="">Todas</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="anoProcesso" class="form-label">Ano do Processo</label>
+                                <select class="form-select" id="anoProcesso" aria-label="Selecione o ano do processo" disabled>
+                                    <option value="">Todos</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-consultar w-100" id="submitButton">
+                                    <i class="fas fa-search me-2" aria-hidden="true"></i>Consultar
+                                    <span class="spinner-border spinner-border-sm loading-spinner ms-2" role="status"
+                                        aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <h2 class="h4"><i class="fas fa-list me-2" aria-hidden="true"></i>Resultados</h2>
+                <div id="resultados" class="row">
+                    <div class="col-12 text-center text-muted py-5">
+                        <i class="fas fa-search fa-3x mb-3" aria-hidden="true"></i>
+                        <p>Use o formulário para realizar uma consulta</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="detalhesModal" tabindex="-1" aria-labelledby="detalhesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detalhesModalLabel">Detalhes do Processo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body" id="detalhesModalBody">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {{ dadosProcessos|json_script:"dados-processos" }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const processos = pegarDadosProcessos();
+            if (!processos) return; 
+
+            const municipioSelect = document.getElementById('municipio');
+            const unidadeSelect = document.getElementById('unidade');
+            const anoProcessoSelect = document.getElementById('anoProcesso');
+            const submitButton = document.getElementById('submitButton');
+            const loadingSpinner = submitButton.querySelector('.loading-spinner');
+            const resultadosContainer = document.getElementById('resultados');
+
+            popularMunicipios(processos, municipioSelect);
+            popularUnidades(processos, unidadeSelect, municipioSelect.value);
+            popularAnos(processos, anoProcessoSelect, municipioSelect.value);
+
+            municipioSelect.addEventListener('change', () => {
+                popularUnidades(processos, unidadeSelect, municipioSelect.value);
+                popularAnos(processos, anoProcessoSelect, municipioSelect.value);
+            });
+
+            document.getElementById('consultaForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+                submitButton.disabled = true;
+                loadingSpinner.style.display = 'inline-block';
+                setTimeout(() => {
+                    try {
+                        const resultados = filtrarResultados(processos, municipioSelect.value, unidadeSelect.value, anoProcessoSelect.value);
+                        mostrarResultados(resultados, resultadosContainer);
+                    } finally {
+                        submitButton.disabled = false;
+                        loadingSpinner.style.display = 'none';
+                    }
+                }, 1000);
+            });
+            atualizarFiltros();
+            function pegarDadosProcessos() {
+                const dadosElement = document.getElementById('dados-processos');
+                if (!dadosElement) {
+                    console.error('Dados não encontrados.');
+                    return null;
+                }
+                try {
+                    const dados = JSON.parse(dadosElement.textContent);
+                    if (!dados?.Compras) {
+                        console.error('Dados de compra não encontrados.');
+                        return null;
+                    }
+                    return dados.Compras;
+                } catch (e) {
+                    console.error('Erro ao ler dados:', e);
+                    return null;
+                }
+            }
+
+            function popularMunicipios(processos, selectElement) {
+                const municipios = new Set(processos.map(p => p.Municipio).filter(m => m));
+                municipios.forEach(m => {
+                    const option = new Option(m, m);
+                    selectElement.appendChild(option);
+                });
+            }
+
+            function popularUnidades(processos, selectElement, municipio) {
+                selectElement.innerHTML = '<option value="">Todas</option>';
+                const unidades = new Set(processos.filter(p => !municipio || p.Municipio === municipio).map(p => p.Unidade).filter(u => u));
+                unidades.forEach(u => {
+                    const option = new Option(u, u);
+                    selectElement.appendChild(option);
+                });
+                selectElement.disabled = !municipio;
+            }
+
+            function popularAnos(processos, selectElement, municipio) {
+                selectElement.innerHTML = '<option value="">Todos</option>';
+                const anos = Array.from(new Set(processos.filter(p => !municipio || p.Municipio === municipio).map(p => p.AnoProcesso).filter(a => a))).sort((a, b) => b - a);
+                anos.forEach(a => {
+                    const option = new Option(a, a);
+                    selectElement.appendChild(option);
+                });
+                selectElement.disabled = !municipio;
+            }
+
+            function filtrarResultados(processos, municipio, unidade, ano) {
+                return processos.filter(p =>
+                    (!municipio || p.Municipio === municipio) &&
+                    (!unidade || p.Unidade === unidade) &&
+                    (!ano || p.AnoProcesso === ano)
+                );
+            }
+
+            function formatarMoeda(valor) {
+                try {
+                    const num = typeof valor === 'string' ? parseFloat(valor.replace(',', '.')) : Number(valor);
+                    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(isNaN(num) ? 0 : num);
+                } catch (e) {
+                    console.error('Erro ao formatar valor:', e);
+                    return 'R$-0.00';
+                }
+            }
+
+            function mostrarResultados(resultados, container) {
+                if (!resultados.length) {
+                    container.innerHTML = `<div class="col-12 text-center text-muted py-5"><i class="fas fa-exclamation-circle fa-3x mb-3" aria-hidden="true"></i><p>Nenhum processo encontrado.</p></div>`;
+                    return;
+                }
+
+                container.innerHTML = resultados.map((p, index) => `
+                    <div class="col-md-6 mb-4">
+                        <div class="card h-100 card-hover processo-card">
+                            <div class="card-body">
+                                <h5 class="card-title">${p.Objeto || 'Objeto não informado'}</h5>
+                                <p class="text-muted">${p.Unidade || 'Unidade não informada'}</p>
+                                <p class="card-text">${p.Objeto || 'Objeto não informado'}</p>
+                                <p class="valor-processo">${formatarMoeda(p.ValorTotalCompra)}</p>
+                                <button class="btn btn-primary btn-sm detalhes-btn" data-processo-id="${index}">Detalhes</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                document.querySelectorAll('.detalhes-btn').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        mostrarDetalhes(resultados[this.dataset.processoId]);
+                    });
+                });
+            }
+
+            function mostrarDetalhes(processo) {
+                const detalhesHTML = `
+                    <p><strong>Município:</strong> ${processo.Municipio || 'Não informado'}</p>
+                    <p><strong>Unidade:</strong> ${processo.Unidade || 'Não informado'}</p>
+                    <p><strong>Ano do Processo:</strong> ${processo.AnoProcesso || 'Não informado'}</p>
+                    <p><strong>Data do Processo:</strong> ${processo.DataProcesso || 'Não informado'}</p>
+                    <p><strong>Valor Total da Compra:</strong> ${formatarMoeda(processo.ValorTotalCompra)}</p>
+                    <p><strong>Objeto:</strong> ${processo.Objeto || 'Não informado'}</p>
+                    <p><strong>Enquadramento Legal:</strong> ${processo.EnquadramentoLegal || 'Não informado'}</p>
+                    <p><strong>Fundamentação:</strong> ${processo.Fundamentacao || 'Não informado'}</p>
+                    <p><strong>Tipo de Fornecedor:</strong> ${processo.TipoFornecedor || 'Não informado'}</p>
+                    <p><strong>CPF/CNPJ do Fornecedor:</strong> ${processo.CPFCNPJFornecedor || 'Não informado'}</p>
+                    <p><strong>Fornecedor:</strong> ${processo.Fornecedor || 'Não informado'}</p>
+                `;
+                document.getElementById('detalhesModalBody').innerHTML = detalhesHTML;
+                new bootstrap.Modal(document.getElementById('detalhesModal')).show();
+            }
+
+            function atualizarFiltros() {
+                const municipioSelecionado = municipioSelect.value;
+                popularUnidades(processos, unidadeSelect, municipioSelecionado);
+                popularAnos(processos, anoProcessoSelect, municipioSelecionado);
+            }
+        });
+    </script>
+</body>
+
+</html>
