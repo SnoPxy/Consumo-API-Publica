@@ -1,7 +1,7 @@
 # Compras Diretas
 
 ## Descrição do Projeto
-Este projeto é uma aplicação web desenvolvida com **Django** e **Bootstrap** que permite consultar e filtrar processos administrativos. A ferramenta possibilita a busca por município, unidade e ano do processo, exibindo os resultados de forma interativa e responsiva.
+Este projeto é uma aplicação web desenvolvida com **Django**, **JavaScript** e **Bootstrap** que permite consultar e filtrar processos administrativos. A ferramenta possibilita a busca por município, unidade e ano do processo, exibindo os resultados de forma interativa e responsiva.
 
 ### Funcionalidades Principais
 - **Consulta de Processos**: Filtra os processos com base em parâmetros como município, unidade e ano.
